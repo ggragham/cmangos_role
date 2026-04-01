@@ -1,3 +1,21 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# defaults file for wow_server
+# Core settings
+CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP address.
+CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
+
+CMANGOS_DB_USERNAME: mangos_username  # Database application username.
+CMANGOS_DB_PASSWORD: mangos_password  # Database application password; recommended to change.
+CMANGOS_DB_ROOT_PASSWORD: mangos_root_password  # Database root password; recommended to change.
+
+
+# Advanced settings
+CMANGOS_MANGOSD_SERVER_NAME: CMaNGOS  # Realm name shown in the client.
+CMANGOS_MANGOSD_GAME_TYPE: 1  # Realm game type; see mangosd.conf for valid values.
+CMANGOS_MANGOSD_REALM_ZONE: 1  # Realm region/zone ID; see mangosd.conf for valid values.
+CMANGOS_MANGOSD_MOTD: Welcome to the Continued Massive Network Game Object Server.  # Message of the day.
+
+CMANGOS_MANGOSD_XP_RATE: 1.2  # Experience rate multiplier.
+CMANGOS_MANGOSD_MONEY_RATE: 1.2  # Money drop rate multiplier.
+
+CMANGOS_AIPLAYERBOT_MIN_RANDOM_BOTS: 900  # Minimum random bot count.
+CMANGOS_AIPLAYERBOT_MAX_RANDOM_BOTS: 1000  # Maximum random bot count.

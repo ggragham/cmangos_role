@@ -1,0 +1,58 @@
+[AhbotConf]
+ConfVersion=2021011201
+
+# Relative probability of bot selling activity.
+# Buying remains enabled at a lower rate.
+AuctionHouseBot.Chance.Sell = 100
+AuctionHouseBot.Chance.Buy = 35
+
+# Item source weights.
+AuctionHouseBot.Loot.Creature.Normal = 35, 42, 8, 12
+AuctionHouseBot.Loot.Creature.Rare = 1, 12, 1, 1
+AuctionHouseBot.Loot.Creature.Elite = 32, 38, 1, 2
+AuctionHouseBot.Loot.Creature.RareElite = -5, 3, 1, 1
+AuctionHouseBot.Loot.Creature.WorldBoss = -20, 1, 1, 1
+AuctionHouseBot.Loot.Disenchant = 12, 16, 1, 1
+AuctionHouseBot.Loot.Fishing = 4, 7, 35, 45
+AuctionHouseBot.Loot.Gameobject = 16, 22, 8, 14
+AuctionHouseBot.Loot.Skinning = 4, 7, 55, 65
+
+# Profession-related item generation.
+# Higher values increase the amount of crafted items and consumables.
+AuctionHouseBot.Items.Profession = 110, 140, 10, 70
+
+# Static required level limit used when player activity
+# is not used for dynamic adjustment.
+AuctionHouseBot.Level.DynamicMaxRequired = 0
+AuctionHouseBot.Level.IgnoreGmAccounts = 0
+AuctionHouseBot.Level.DynamicRefreshInterval = 10
+AuctionHouseBot.Level.MaxRequired = {% if CMANGOS_EXPANSION == 'classic' %}60{% elif CMANGOS_EXPANSION == 'tbc' %}70{% elif CMANGOS_EXPANSION == 'wotlk' %}80{% endif %}
+
+# Item value multipliers by quality and item class.
+# Class 0..16: Consumable, Container, Weapon, Gem, Armor, Reagent,
+# Projectile, Trade Goods, Generic, Recipe, Money, Quiver, Quest, Key, Permanent, Misc, Glyph
+AuctionHouseBot.Value.Poor      =   0,  0,  0,  0,  0,  0,  0,  0, 0,  0, 0,  0,  0,  0, 0,  0,  0
+AuctionHouseBot.Value.Normal    = 100,110,  0,100,  0,120,100,115, 0,125, 0,100,100,100, 0,100,100
+AuctionHouseBot.Value.Uncommon  = 220,230,240,220,240,230,180,220, 0,260, 0,180,140,120, 0,200,200
+AuctionHouseBot.Value.Rare      = 420,430,460,420,460,430,250,360, 0,500, 0,250,180,150, 0,300,300
+AuctionHouseBot.Value.Epic      = 900,900,950,900,950,900,300,500, 0,950, 0,300,250,180, 0,400,400
+AuctionHouseBot.Value.Legendary =   0,  0,  0,  0,  0,  0,  0,  0, 0,  0, 0,  0,  0,  0, 0,  0,  0
+AuctionHouseBot.Value.Artifact  =   0,  0,  0,  0,  0,  0,  0,  0, 0,  0, 0,  0,  0,  0, 0,  0,  0
+
+# Vendor items are prevented from reaching excessive price values.
+AuctionHouseBot.Value.Vendor = 1
+
+# Price variance applied to auction listings.
+AuctionHouseBot.Value.Variance = 15
+
+# Starting bid relative to the buyout price.
+AuctionHouseBot.Bid.Min = 75
+AuctionHouseBot.Bid.Max = 90
+
+# Auction duration limits.
+AuctionHouseBot.Time.Min = 4
+AuctionHouseBot.Time.Max = 24
+
+# Maximum price the bot is willing to pay
+# for player-listed auctions.
+AuctionHouseBot.Buy.Value = 85
