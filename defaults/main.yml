@@ -13,7 +13,7 @@ CMANGOS_HOST_UID: 1000  # UID of the primary user on the host; usually 1000.
 CMANGOS_HOST_GID: 1000  # GID of the primary user on the host; usually 1000.
 
 # Advanced settings
-CMANGOS_DOCKER_TAG: 2025.02.26  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
+CMANGOS_DOCKER_TAG: 2025.05.11  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
 
 CMANGOS_MANGOSD_SERVER_NAME: CMaNGOS  # Realm name shown in the client.
 CMANGOS_MANGOSD_GAME_TYPE: 1  # Realm game type; see mangosd.conf for valid values.
