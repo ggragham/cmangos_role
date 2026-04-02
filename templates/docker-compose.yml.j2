@@ -74,7 +74,7 @@ services:
       wait-for-db:
         condition: service_completed_successfully
     healthcheck:
-      test: ['CMD', 'nc', '-z', 'localhost', '3724']
+      test: ["CMD-SHELL", "timeout 2 bash -c '</dev/tcp/127.0.0.1/3724'"]
       interval: 1m
       timeout: 3s
       retries: 5
@@ -103,7 +103,7 @@ services:
     restart: unless-stopped
     stop_grace_period: 2m
     healthcheck:
-      test: ['CMD', 'nc', '-z', 'localhost', '8085']
+      test: ["CMD-SHELL", "timeout 2 bash -c '</dev/tcp/127.0.0.1/8085'"]
       interval: 1m
       timeout: 3s
       retries: 5
