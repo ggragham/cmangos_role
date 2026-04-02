@@ -128,3 +128,104 @@
     - name: Show resulting realmlist row
       debug:
         var: realmlist_after.stdout_lines
+
+- name: Disable default realm accounts
+  block:
+    - name: Prepare account disable SQL values
+      set_fact:
+        account_disable_usernames_count: '{{ CMANGOS_REALMD_DISABLE_ACCOUNTS | length }}'
+        account_disable_usernames_sql: >-
+          '{{ CMANGOS_REALMD_DISABLE_ACCOUNTS
+              | map("string")
+              | map("replace", "'", "''")
+              | join("', '") }}'
+
+    - name: Read target account ids
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT COALESCE(GROUP_CONCAT(id ORDER BY id SEPARATOR ','), '')
+          FROM account
+          WHERE username IN ({{ account_disable_usernames_sql }});
+      register: account_disable_ids
+      changed_when: false
+      when: (account_disable_usernames_count | int) > 0
+
+    - name: Check whether target account ids exist
+      set_fact:
+        account_disable_target_ids_exist: '{{ (account_disable_ids.stdout | trim | length) > 0 }}'
+      when: (account_disable_usernames_count | int) > 0
+
+    - name: Ban target accounts
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          INSERT INTO account_banned
+            (account_id, banned_by, reason, active)
+          SELECT
+            a.id,
+            '',
+            '',
+            1
+          FROM account a
+          LEFT JOIN account_banned ab
+            ON ab.account_id = a.id
+          AND ab.active = 1
+          WHERE a.username IN ({{ account_disable_usernames_sql }})
+            AND ab.account_id IS NULL;
+          SELECT ROW_COUNT();
+      register: account_disable_insert_result
+      changed_when: >-
+        {{
+          (account_disable_insert_result.stdout_lines | last | trim | int) > 0
+        }}
+      when:
+        - (account_disable_usernames_count | int) > 0
+        - account_disable_target_ids_exist | bool
+
+    - name: Read resulting banned accounts
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT CONCAT_WS(' | ', a.id, a.username, ab.active)
+          FROM account a
+          INNER JOIN account_banned ab
+            ON ab.account_id = a.id
+          WHERE a.username IN ({{ account_disable_usernames_sql }})
+            AND ab.active = 1
+          ORDER BY a.id, ab.id DESC;
+      register: account_disable_after
+      changed_when: false
+      when:
+        - (account_disable_usernames_count | int) > 0
+        - account_disable_target_ids_exist | bool
+        - account_disable_insert_result.changed
+
+    - name: Show resulting banned accounts
+      debug:
+        var: account_disable_after.stdout_lines
+      when:
+        - (account_disable_usernames_count | int) > 0
+        - account_disable_target_ids_exist | bool
+        - account_disable_insert_result.changed

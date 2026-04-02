@@ -20,3 +20,10 @@ CMANGOS_MARIADB_EXEC_CMD: >-
   --batch
   --raw
   --skip-column-names
+
+# List of default accounts to disable.
+CMANGOS_REALMD_DISABLE_ACCOUNTS:
+  - ADMINISTRATOR
+  - GAMEMASTER
+  - MODERATOR
+  - PLAYER
