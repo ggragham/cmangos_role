@@ -1,3 +1,6 @@
 ---
+- name: Init tasks
+  include_tasks: init.yml
+
 - name: Deploy CMaNGOS
   include_tasks: deploy.yml
