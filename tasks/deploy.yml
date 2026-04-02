@@ -33,6 +33,7 @@
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
     mode: '0644'
+  notify: Restart CMaNGOS
 
 - name: Apply .env
   template:
@@ -40,6 +41,7 @@
     dest: '{{ CMANGOS_DOCKER_PATH }}/.env'
     owner: '{{ CMANGOS_HOST_UID }}'
     mode: '0600'
+  notify: Restart CMaNGOS
 
 - name: Apply CMaNGOS config templates
   template:
@@ -55,6 +57,7 @@
     - mangosd.{{ CMANGOS_EXPANSION }}.conf
     - ahbot.conf
     - aiplayerbot.{{ CMANGOS_EXPANSION }}.conf
+  notify: Restart CMaNGOS
 
 - name: Deploy WoW client-data
   synchronize:
@@ -64,6 +67,7 @@
     archive: true
     rsync_opts:
       - --chmod=F0644,D0755
+  notify: Restart CMaNGOS
 
 - name: Fix owner and group after assets sync
   file:

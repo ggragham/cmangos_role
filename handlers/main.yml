@@ -1,3 +1,7 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# handlers file for wow_server
+- name: Restart CMaNGOS
+  community.docker.docker_compose_v2:
+    project_src: '{{ CMANGOS_DOCKER_PATH }}'
+    state: present
+    recreate: always
+    remove_orphans: true
