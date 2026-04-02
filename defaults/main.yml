@@ -1,7 +1,6 @@
 ---
 # Core settings
 CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP address.
-CMANGOS_ENABLE_BOTS: true  # Enable "AI" player bots.
 CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
 CMANGOS_ASSETS_SRC: ./client-data  # Path to extracted WoW client-data, or keep ./client-data next to the playbook.
 
@@ -11,6 +10,11 @@ CMANGOS_DB_ROOT_PASSWORD: mangos_root_password  # Database root password; recomm
 
 CMANGOS_HOST_UID: 1000  # UID of the primary user on the host; usually 1000.
 CMANGOS_HOST_GID: 1000  # GID of the primary user on the host; usually 1000.
+
+# Bot settings
+CMANGOS_ENABLE_BOTS: true  # Enable "AI" player bots.
+CMANGOS_AIPLAYERBOT_MIN_RANDOM_BOTS: 900  # Minimum random bot count.
+CMANGOS_AIPLAYERBOT_MAX_RANDOM_BOTS: 1000  # Maximum random bot count.
 
 # Advanced settings
 CMANGOS_DOCKER_TAG: 2025.05.11  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
@@ -22,6 +26,3 @@ CMANGOS_MANGOSD_MOTD: Welcome to the Continued Massive Network Game Object Serve
 
 CMANGOS_MANGOSD_XP_RATE: 1.2  # Experience rate multiplier.
 CMANGOS_MANGOSD_MONEY_RATE: 1.2  # Money drop rate multiplier.
-
-CMANGOS_AIPLAYERBOT_MIN_RANDOM_BOTS: 900  # Minimum random bot count.
-CMANGOS_AIPLAYERBOT_MAX_RANDOM_BOTS: 1000  # Maximum random bot count.
