@@ -128,9 +128,3 @@
     - name: Show resulting realmlist row
       debug:
         var: realmlist_after.stdout_lines
-
-- name: Stop DB service
-  community.docker.docker_compose_v2:
-    project_src: '{{ CMANGOS_DOCKER_PATH }}'
-    services: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
-    state: stopped
