@@ -4,3 +4,6 @@
 
 - name: Deploy CMaNGOS
   include_tasks: deploy.yml
+
+- name: Configure DB
+  include_tasks: db.yml

@@ -11,3 +11,12 @@ CMANGOS_DOCKER_SERVICE_NAME: cmangos-{{ CMANGOS_EXPANSION }}  # CMaNGOS Docker s
 CMANGOS_DOCKER_DB_SERVICE_NAME: '{{ CMANGOS_DOCKER_SERVICE_NAME }}-db'  # CMaNGOS Docker DB service name.
 CMANGOS_DOCKER_REALMD_SERVICE_NAME: '{{ CMANGOS_DOCKER_SERVICE_NAME }}-realmd'  # CMaNGOS Docker realmd service name.
 CMANGOS_DOCKER_MANGOSD_SERVICE_NAME: '{{ CMANGOS_DOCKER_SERVICE_NAME }}-mangosd'  # CMaNGOS Docker mangosd service name.
+
+# Command to execute MariaDB with user credentials and settings.
+CMANGOS_MARIADB_EXEC_CMD: >-
+  exec mariadb
+  -u{{ CMANGOS_DB_USERNAME }}
+  -p"{{ CMANGOS_DB_PASSWORD }}"
+  --batch
+  --raw
+  --skip-column-names

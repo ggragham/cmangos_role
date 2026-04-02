@@ -1,0 +1,136 @@
+---
+- name: Start DB service
+  community.docker.docker_compose_v2:
+    project_src: '{{ CMANGOS_DOCKER_PATH }}'
+    services: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+    state: present
+    wait: true
+    wait_timeout: 900
+
+- name: Configure realmlist
+  block:
+    - name: Read rows count except id=1
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT COUNT(*)
+          FROM realmlist
+          WHERE id <> 1;
+      register: realmlist_extra_rows
+      changed_when: false
+
+    - name: Read row id=1 name and address if present
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT CONCAT_WS('\t', COALESCE(name, ''), COALESCE(address, ''))
+          FROM realmlist
+          WHERE id = 1
+          LIMIT 1;
+      register: realmlist_row1
+      changed_when: false
+
+    - name: Parse current realmlist state
+      set_fact:
+        realmlist_extra_count: '{{ realmlist_extra_rows.stdout | trim | int }}'
+        realmlist_row1_exists: '{{ (realmlist_row1.stdout | trim | length) > 0 }}'
+        realmlist_row1_parts: "{{ (realmlist_row1.stdout | trim).split('\t') + ['', ''] }}"
+
+    - name: Delete all rows except id=1
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          DELETE FROM realmlist
+          WHERE id <> 1;
+      when: (realmlist_extra_count | int) > 0
+
+    - name: Create row id=1 when row is absent
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          INSERT INTO realmlist
+            (id, name, address, port)
+          VALUES
+            (
+              1,
+              '{{ CMANGOS_MANGOSD_SERVER_NAME | replace("'", "''") }}',
+              '{{ CMANGOS_DOMAIN | replace("'", "''") }}',
+              8085
+            );
+      when: not (realmlist_row1_exists | bool)
+
+    - name: Update row id=1 when name or address differ
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          UPDATE realmlist
+          SET
+            name = '{{ CMANGOS_MANGOSD_SERVER_NAME | replace("'", "''") }}',
+            address = '{{ CMANGOS_DOMAIN | replace("'", "''") }}'
+          WHERE id = 1;
+      when:
+        - realmlist_row1_exists | bool
+        - realmlist_row1_parts[0] != (CMANGOS_MANGOSD_SERVER_NAME | string) or realmlist_row1_parts[1] != (CMANGOS_DOMAIN | string)
+
+    - name: Read resulting realmlist row
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT CONCAT_WS(' | ', id, name, address, port)
+          FROM realmlist
+          WHERE id = 1
+          LIMIT 1;
+      register: realmlist_after
+      changed_when: false
+
+    - name: Show resulting realmlist row
+      debug:
+        var: realmlist_after.stdout_lines
+
+- name: Stop DB service
+  community.docker.docker_compose_v2:
+    project_src: '{{ CMANGOS_DOCKER_PATH }}'
+    services: '{{ CMANGOS_DOCKER_DB_SERVICE_NAME }}'
+    state: stopped
