@@ -9,3 +9,14 @@
       fail:
         msg: Docker is not installed
       when: not docker_installed.stat.exists
+
+- name: Install rsync
+  block:
+    - name: Install Rsync to RHEL-based system
+      dnf:
+        name: rsync
+        state: present
+        update_cache: true
+        install_weak_deps: false
+      when: ansible_os_family == 'RedHat'
+      become: true

@@ -55,3 +55,20 @@
     - mangosd.{{ CMANGOS_EXPANSION }}.conf
     - ahbot.conf
     - aiplayerbot.{{ CMANGOS_EXPANSION }}.conf
+
+- name: Deploy WoW client-data
+  synchronize:
+    src: '{{ CMANGOS_ASSETS_SRC }}/'
+    dest: '{{ CMANGOS_DOCKER_ASSETS_PATH }}'
+    delete: true
+    archive: true
+    rsync_opts:
+      - --chmod=F0644,D0755
+
+- name: Fix owner and group after assets sync
+  file:
+    path: '{{ CMANGOS_DOCKER_ASSETS_PATH }}'
+    owner: '{{ CMANGOS_HOST_UID }}'
+    group: '{{ CMANGOS_HOST_GID }}'
+    recurse: true
+  become: true

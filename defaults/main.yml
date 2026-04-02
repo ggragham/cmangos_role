@@ -3,6 +3,7 @@
 CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP address.
 CMANGOS_ENABLE_BOTS: true  # Enable "AI" player bots.
 CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
+CMANGOS_ASSETS_SRC: ./client-data  # Path to extracted WoW client-data, or keep ./client-data next to the playbook.
 
 CMANGOS_DB_USERNAME: mangos_username  # Database application username.
 CMANGOS_DB_PASSWORD: mangos_password  # Database application password; recommended to change.
