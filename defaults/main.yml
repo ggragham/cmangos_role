@@ -18,6 +18,7 @@ CMANGOS_AIPLAYERBOT_MAX_RANDOM_BOTS: 1000  # Maximum random bot count.
 
 # Advanced settings
 CMANGOS_DOCKER_TAG: 2025.05.11  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
+CMANGOS_INSTALL_PHPMYADMIN: false  # Enable phpMyAdmin for database administration; exposed on port 8080 when enabled.
 
 CMANGOS_MANGOSD_SERVER_NAME: CMaNGOS  # Realm name shown in the client.
 CMANGOS_MANGOSD_GAME_TYPE: 1  # Realm game type; see mangosd.conf for valid values.

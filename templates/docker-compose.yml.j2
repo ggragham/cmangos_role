@@ -48,6 +48,7 @@ services:
       - DB01_USER=root
       - DB01_PASS=${MARIADB_ROOT_PASSWORD}
 
+{% if CMANGOS_INSTALL_PHPMYADMIN | default(false) | bool %}
   phpmyadmin:
     image: phpmyadmin
     depends_on:
@@ -60,6 +61,7 @@ services:
       - PMA_PORT=3306
       - PMA_USER=root
       - PMA_PASSWORD=${MARIADB_ROOT_PASSWORD}
+{% endif %}
 
   # ================================================
 
