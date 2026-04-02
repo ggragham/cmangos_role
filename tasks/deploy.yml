@@ -43,21 +43,34 @@
     mode: '0600'
   notify: Restart CMaNGOS
 
-- name: Apply CMaNGOS config templates
+- name: Apply realmd and mangosd config templates
   template:
-    src: '{{ cmangos_config }}.j2'
-    dest: '{{ CMANGOS_CONFIG_PATH }}/{{ cmangos_config }}'
+    src: '{{ cmangos_default_config }}.j2'
+    dest: '{{ CMANGOS_CONFIG_PATH }}/{{ cmangos_default_config }}'
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
     mode: '0644'
   loop_control:
-    loop_var: cmangos_config
+    loop_var: cmangos_default_config
   loop:
     - realmd.conf
     - mangosd.{{ CMANGOS_EXPANSION }}.conf
+  notify: Restart CMaNGOS
+
+- name: Apply ahbot and aiplayerbot config templates
+  template:
+    src: '{{ cmangos_bots_config }}.j2'
+    dest: '{{ CMANGOS_CONFIG_PATH }}/{{ cmangos_bots_config }}'
+    owner: '{{ CMANGOS_HOST_UID }}'
+    group: '{{ CMANGOS_HOST_GID }}'
+    mode: '0644'
+  loop_control:
+    loop_var: cmangos_bots_config
+  loop:
     - ahbot.conf
     - aiplayerbot.{{ CMANGOS_EXPANSION }}.conf
   notify: Restart CMaNGOS
+  when: CMANGOS_ENABLE_BOTS | default(false) | bool
 
 - name: Deploy WoW client-data
   synchronize:
