@@ -5,7 +5,7 @@
     state: directory
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
-    mode: 0755
+    mode: '0755'
   become: true
 
 - name: Create CMaNGOS subdirs
@@ -14,7 +14,7 @@
     state: directory
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
-    mode: 0755
+    mode: '0755'
   loop_control:
     loop_var: cmangos_dir
   loop:
