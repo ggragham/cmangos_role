@@ -1,14 +1,19 @@
 ---
 # Core settings
 CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP address.
+CMANGOS_ENABLE_BOTS: true  # Enable "AI" player bots.
 CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
 
 CMANGOS_DB_USERNAME: mangos_username  # Database application username.
 CMANGOS_DB_PASSWORD: mangos_password  # Database application password; recommended to change.
 CMANGOS_DB_ROOT_PASSWORD: mangos_root_password  # Database root password; recommended to change.
 
+CMANGOS_HOST_UID: 1000  # UID of the primary user on the host; usually 1000.
+CMANGOS_HOST_GID: 1000  # GID of the primary user on the host; usually 1000.
 
 # Advanced settings
+CMANGOS_DOCKER_TAG: 2025.02.26  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
+
 CMANGOS_MANGOSD_SERVER_NAME: CMaNGOS  # Realm name shown in the client.
 CMANGOS_MANGOSD_GAME_TYPE: 1  # Realm game type; see mangosd.conf for valid values.
 CMANGOS_MANGOSD_REALM_ZONE: 1  # Realm region/zone ID; see mangosd.conf for valid values.

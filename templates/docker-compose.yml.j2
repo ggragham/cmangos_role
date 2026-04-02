@@ -1,0 +1,125 @@
+services:
+  {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}:
+    image: docker.io/thoriumlxc/cmangos-{{ CMANGOS_EXPANSION }}db:{{ CMANGOS_DOCKER_TAG }}
+    container_name: {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}-container
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 1m
+      timeout: 3s
+      retries: 5
+      start_period: 5m
+    volumes:
+      - cmangos-{{ CMANGOS_EXPANSION }}-database:/var/lib/mysql
+    environment:
+      - TZ=Etc/UTC
+      - MARIADB_USER=${MARIADB_USER}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+
+
+  wait-for-db:
+    image: atkrad/wait4x
+    depends_on:
+      - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+    command: tcp {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}:3306 -t 600s -i 5s
+
+  database-backup:
+    image: tiredofit/db-backup
+    depends_on:
+      - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+    restart: unless-stopped
+    volumes:
+      - ./backups:/backup:Z
+    environment:
+      - TZ=Etc/UTC
+      - CONTAINER_ENABLE_MONITORING=False
+      - USER_DBBACKUP={{ CMANGOS_HOST_GID }}
+      - GROUP_DBBACKUP={{ CMANGOS_HOST_GID }}
+      # Backup policies
+      - DEFAULT_COMPRESSION=GZ
+      - DEFAULT_BACKUP_INTERVAL=1440
+      - DEFAULT_BACKUP_BEGIN=0400
+      - DEFAULT_CLEANUP_TIME=10080
+      # Target Database
+      - DB01_TYPE=mariadb
+      - DB01_HOST={{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+      - DB01_NAME={{ CMANGOS_EXPANSION }}characters,{{ CMANGOS_EXPANSION }}realmd
+      - DB01_USER=root
+      - DB01_PASS=${MARIADB_ROOT_PASSWORD}
+
+  phpmyadmin:
+    image: phpmyadmin
+    depends_on:
+      - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST={{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=${MARIADB_ROOT_PASSWORD}
+
+  # ================================================
+
+  {{ CMANGOS_DOCKER_REALMD_SERVICE_NAME }}:
+    image: docker.io/thoriumlxc/cmangos-{{ CMANGOS_EXPANSION }}:{{ 'bots' if CMANGOS_ENABLE_BOTS | bool else 'default' }}-{{ CMANGOS_DOCKER_TAG }}
+    container_name: {{ CMANGOS_DOCKER_REALMD_SERVICE_NAME }}-container
+    user: {{ CMANGOS_HOST_UID }}:7878
+    command: realmd
+    ulimits:
+      nofile: 1024
+    depends_on:
+      wait-for-db:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'nc', '-z', 'localhost', '3724']
+      interval: 1m
+      timeout: 3s
+      retries: 5
+      start_period: 5m
+    restart: unless-stopped
+    volumes:
+      - {{ CMANGOS_CONFIG_PATH }}/realmd.conf:/opt/mangos/etc/realmd.conf:ro,z
+      - {{ CMANGOS_DOCKER_REALMD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
+    ports:
+      - 3724:3724
+    environment:
+      - TZ=Etc/UTC
+
+  {{ CMANGOS_DOCKER_MANGOSD_SERVICE_NAME }}:
+    image: docker.io/thoriumlxc/cmangos-{{ CMANGOS_EXPANSION }}:{{ 'bots' if CMANGOS_ENABLE_BOTS | bool else 'default' }}-{{ CMANGOS_DOCKER_TAG }}
+    container_name: {{ CMANGOS_DOCKER_MANGOSD_SERVICE_NAME }}-container
+    user: {{ CMANGOS_HOST_UID }}:7878
+    command: mangosd
+    ulimits:
+      nofile: 1024
+    tty: true
+    stdin_open: true
+    depends_on:
+      wait-for-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 2m
+    healthcheck:
+      test: ['CMD', 'nc', '-z', 'localhost', '8085']
+      interval: 1m
+      timeout: 3s
+      retries: 5
+      start_period: 5m
+    ports:
+      - 8085:8085
+    environment:
+      - TZ=Etc/UTC
+    volumes:
+      - {{ CMANGOS_DOCKER_ASSETS_PATH }}:/opt/mangos/storage/data:ro,Z
+      - {{ CMANGOS_CONFIG_PATH }}/mangosd.{{ CMANGOS_EXPANSION }}.conf:/opt/mangos/etc/mangosd.conf:ro,z
+      - {{ CMANGOS_DOCKER_MANGOSD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
+      - {{ CMANGOS_DOCKER_STORAGE_HONOR_PATH }}:/opt/mangos/storage/honor,z
+      - {{ CMANGOS_CONFIG_PATH }}/aiplayerbot.{{ CMANGOS_EXPANSION }}.conf:/opt/mangos/etc/aiplayerbot.conf:ro,z
+      - {{ CMANGOS_CONFIG_PATH }}/ahbot.conf:/opt/mangos/etc/ahbot.conf:ro,z
+
+volumes:
+  cmangos-{{ CMANGOS_EXPANSION }}-database:
+
