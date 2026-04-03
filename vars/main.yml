@@ -1,16 +1,16 @@
 ---
-CMANGOS_DOCKER_PATH: /opt/cmangos_docker  # CMaNGOS Docker installation path.
-CMANGOS_CONFIG_PATH: '{{ CMANGOS_DOCKER_PATH }}/config'  # CMaNGOS Docker configs path.
-CMANGOS_DOCKER_ASSETS_PATH: '{{ CMANGOS_DOCKER_PATH }}/assets'  # CMaNGOS Docker assets path.
-CMANGOS_DOCKER_STORAGE_PATH: '{{ CMANGOS_DOCKER_PATH }}/storage'  # CMaNGOS Docker storage path.
-CMANGOS_DOCKER_STORAGE_HONOR_PATH: '{{ CMANGOS_DOCKER_STORAGE_PATH }}/honor'  # CMaNGOS Docker honor storage path.
-CMANGOS_DOCKER_LOGS_PATH: '{{ CMANGOS_DOCKER_PATH }}/logs'  # CMaNGOS Docker logs path.
-CMANGOS_DOCKER_REALMD_LOGS_PATH: '{{ CMANGOS_DOCKER_LOGS_PATH }}/realmd'  # CMaNGOS Docker realmd logs path.
-CMANGOS_DOCKER_MANGOSD_LOGS_PATH: '{{ CMANGOS_DOCKER_LOGS_PATH }}/mangosd'  # CMaNGOS Docker mangosd logs path.
-CMANGOS_DOCKER_SERVICE_NAME: cmangos-{{ CMANGOS_EXPANSION }}  # CMaNGOS Docker service name.
-CMANGOS_DOCKER_DB_SERVICE_NAME: '{{ CMANGOS_DOCKER_SERVICE_NAME }}-db'  # CMaNGOS Docker DB service name.
-CMANGOS_DOCKER_REALMD_SERVICE_NAME: '{{ CMANGOS_DOCKER_SERVICE_NAME }}-realmd'  # CMaNGOS Docker realmd service name.
-CMANGOS_DOCKER_MANGOSD_SERVICE_NAME: '{{ CMANGOS_DOCKER_SERVICE_NAME }}-mangosd'  # CMaNGOS Docker mangosd service name.
+CMANGOS_DOCKER_PATH: /opt/cmangos_docker # CMaNGOS installation path.
+CMANGOS_CONFIG_PATH: '{{ CMANGOS_DOCKER_PATH }}/config'  # CMaNGOS configs path.
+CMANGOS_ASSETS_PATH: '{{ CMANGOS_DOCKER_PATH }}/assets'  # CMaNGOS assets path.
+CMANGOS_STORAGE_PATH: '{{ CMANGOS_DOCKER_PATH }}/storage'  # CMaNGOS storage path.
+CMANGOS_STORAGE_HONOR_PATH: '{{ CMANGOS_STORAGE_PATH }}/honor'  # CMaNGOS honor storage path.
+CMANGOS_LOGS_PATH: '{{ CMANGOS_DOCKER_PATH }}/logs'  # CMaNGOS logs path.
+CMANGOS_REALMD_LOGS_PATH: '{{ CMANGOS_LOGS_PATH }}/realmd'  # CMaNGOS realmd logs path.
+CMANGOS_MANGOSD_LOGS_PATH: '{{ CMANGOS_LOGS_PATH }}/mangosd'  # CMaNGOS mangosd logs path.
+CMANGOS_SERVICE_NAME: cmangos-{{ CMANGOS_EXPANSION }}  # CMaNGOS service name.
+CMANGOS_DB_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-db'  # CMaNGOS DB service name.
+CMANGOS_REALMD_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-realmd'  # CMaNGOS realmd service name.
+CMANGOS_MANGOSD_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-mangosd'  # CMaNGOS mangosd service name.
 
 # Command to execute MariaDB with user credentials and settings.
 CMANGOS_MARIADB_EXEC_CMD: >-

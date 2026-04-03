@@ -10,12 +10,12 @@
     loop_var: cmangos_dir
   loop:
     - '{{ CMANGOS_CONFIG_PATH }}'
-    - '{{ CMANGOS_DOCKER_ASSETS_PATH }}'
-    - '{{ CMANGOS_DOCKER_STORAGE_PATH }}'
-    - '{{ CMANGOS_DOCKER_STORAGE_HONOR_PATH }}'
-    - '{{ CMANGOS_DOCKER_LOGS_PATH }}'
-    - '{{ CMANGOS_DOCKER_REALMD_LOGS_PATH }}'
-    - '{{ CMANGOS_DOCKER_MANGOSD_LOGS_PATH }}'
+    - '{{ CMANGOS_ASSETS_PATH }}'
+    - '{{ CMANGOS_STORAGE_PATH }}'
+    - '{{ CMANGOS_STORAGE_HONOR_PATH }}'
+    - '{{ CMANGOS_LOGS_PATH }}'
+    - '{{ CMANGOS_REALMD_LOGS_PATH }}'
+    - '{{ CMANGOS_MANGOSD_LOGS_PATH }}'
 
 - name: Apply CMaNGOS Compose template
   template:
@@ -66,7 +66,7 @@
 - name: Deploy WoW client-data
   synchronize:
     src: '{{ CMANGOS_ASSETS_SRC }}/'
-    dest: '{{ CMANGOS_DOCKER_ASSETS_PATH }}'
+    dest: '{{ CMANGOS_ASSETS_PATH }}'
     delete: true
     archive: true
     rsync_opts:
@@ -75,7 +75,7 @@
 
 - name: Fix owner and group after assets sync
   file:
-    path: '{{ CMANGOS_DOCKER_ASSETS_PATH }}'
+    path: '{{ CMANGOS_ASSETS_PATH }}'
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
     recurse: true

@@ -1,7 +1,7 @@
 services:
-  {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}:
+  {{ CMANGOS_DB_SERVICE_NAME }}:
     image: docker.io/thoriumlxc/cmangos-{{ CMANGOS_EXPANSION }}db:{{ CMANGOS_DOCKER_TAG }}
-    container_name: {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}-container
+    container_name: {{ CMANGOS_DB_SERVICE_NAME }}-container
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
@@ -23,15 +23,15 @@ services:
   wait-for-db:
     image: atkrad/wait4x
     depends_on:
-      - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
-    command: tcp {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}:3306 -t 600s -i 5s
+      - {{ CMANGOS_DB_SERVICE_NAME }}
+    command: tcp {{ CMANGOS_DB_SERVICE_NAME }}:3306 -t 600s -i 5s
     networks:
       - cmangos-{{ CMANGOS_EXPANSION }}-db-network
 
   database-backup:
     image: tiredofit/db-backup
     depends_on:
-      - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+      - {{ CMANGOS_DB_SERVICE_NAME }}
     restart: unless-stopped
     networks:
       - cmangos-{{ CMANGOS_EXPANSION }}-db-network
@@ -49,7 +49,7 @@ services:
       - DEFAULT_CLEANUP_TIME=10080
       # Target Database
       - DB01_TYPE=mariadb
-      - DB01_HOST={{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+      - DB01_HOST={{ CMANGOS_DB_SERVICE_NAME }}
       - DB01_NAME={{ CMANGOS_EXPANSION }}characters,{{ CMANGOS_EXPANSION }}realmd
       - DB01_USER=root
       - DB01_PASS=${MARIADB_ROOT_PASSWORD}
@@ -58,14 +58,14 @@ services:
   phpmyadmin:
     image: phpmyadmin
     depends_on:
-      - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+      - {{ CMANGOS_DB_SERVICE_NAME }}
     restart: unless-stopped
     networks:
       - cmangos-{{ CMANGOS_EXPANSION }}-db-network
     ports:
       - 8080:80
     environment:
-      - PMA_HOST={{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
+      - PMA_HOST={{ CMANGOS_DB_SERVICE_NAME }}
       - PMA_PORT=3306
       - PMA_USER=root
       - PMA_PASSWORD=${MARIADB_ROOT_PASSWORD}
@@ -73,9 +73,9 @@ services:
 
   # ================================================
 
-  {{ CMANGOS_DOCKER_REALMD_SERVICE_NAME }}:
+  {{ CMANGOS_REALMD_SERVICE_NAME }}:
     image: docker.io/thoriumlxc/cmangos-{{ CMANGOS_EXPANSION }}:{{ 'bots' if CMANGOS_ENABLE_BOTS | bool else 'default' }}-{{ CMANGOS_DOCKER_TAG }}
-    container_name: {{ CMANGOS_DOCKER_REALMD_SERVICE_NAME }}-container
+    container_name: {{ CMANGOS_REALMD_SERVICE_NAME }}-container
     user: {{ CMANGOS_HOST_UID }}:7878
     command: realmd
     ulimits:
@@ -97,13 +97,13 @@ services:
       - 3724:3724
     volumes:
       - {{ CMANGOS_CONFIG_PATH }}/realmd.conf:/opt/mangos/etc/realmd.conf:ro,z
-      - {{ CMANGOS_DOCKER_REALMD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
+      - {{ CMANGOS_REALMD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
     environment:
       - TZ=Etc/UTC
 
-  {{ CMANGOS_DOCKER_MANGOSD_SERVICE_NAME }}:
+  {{ CMANGOS_MANGOSD_SERVICE_NAME }}:
     image: docker.io/thoriumlxc/cmangos-{{ CMANGOS_EXPANSION }}:{{ 'bots' if CMANGOS_ENABLE_BOTS | bool else 'default' }}-{{ CMANGOS_DOCKER_TAG }}
-    container_name: {{ CMANGOS_DOCKER_MANGOSD_SERVICE_NAME }}-container
+    container_name: {{ CMANGOS_MANGOSD_SERVICE_NAME }}-container
     user: {{ CMANGOS_HOST_UID }}:7878
     command: mangosd
     ulimits:
@@ -129,10 +129,10 @@ services:
     environment:
       - TZ=Etc/UTC
     volumes:
-      - {{ CMANGOS_DOCKER_ASSETS_PATH }}:/opt/mangos/storage/data:ro,Z
+      - {{ CMANGOS_ASSETS_PATH }}:/opt/mangos/storage/data:ro,Z
       - {{ CMANGOS_CONFIG_PATH }}/mangosd.{{ CMANGOS_EXPANSION }}.conf:/opt/mangos/etc/mangosd.conf:ro,z
-      - {{ CMANGOS_DOCKER_MANGOSD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
-      - {{ CMANGOS_DOCKER_STORAGE_HONOR_PATH }}:/opt/mangos/storage/honor,z
+      - {{ CMANGOS_MANGOSD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
+      - {{ CMANGOS_STORAGE_HONOR_PATH }}:/opt/mangos/storage/honor,z
       - {{ CMANGOS_CONFIG_PATH }}/aiplayerbot.{{ CMANGOS_EXPANSION }}.conf:/opt/mangos/etc/aiplayerbot.conf:ro,z
       - {{ CMANGOS_CONFIG_PATH }}/ahbot.conf:/opt/mangos/etc/ahbot.conf:ro,z
 
