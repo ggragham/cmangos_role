@@ -9,6 +9,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5m
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-db-network
     volumes:
       - cmangos-{{ CMANGOS_EXPANSION }}-database:/var/lib/mysql
     environment:
@@ -23,12 +25,16 @@ services:
     depends_on:
       - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
     command: tcp {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}:3306 -t 600s -i 5s
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-db-network
 
   database-backup:
     image: tiredofit/db-backup
     depends_on:
       - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
     restart: unless-stopped
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-db-network
     volumes:
       - ./backups:/backup:Z
     environment:
@@ -54,6 +60,8 @@ services:
     depends_on:
       - {{ CMANGOS_DOCKER_DB_SERVICE_NAME }}
     restart: unless-stopped
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-db-network
     ports:
       - 8080:80
     environment:
@@ -82,11 +90,14 @@ services:
       retries: 5
       start_period: 5m
     restart: unless-stopped
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-db-network
+      - cmangos-{{ CMANGOS_EXPANSION }}-network
+    ports:
+      - 3724:3724
     volumes:
       - {{ CMANGOS_CONFIG_PATH }}/realmd.conf:/opt/mangos/etc/realmd.conf:ro,z
       - {{ CMANGOS_DOCKER_REALMD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
-    ports:
-      - 3724:3724
     environment:
       - TZ=Etc/UTC
 
@@ -110,6 +121,9 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5m
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-db-network
+      - cmangos-{{ CMANGOS_EXPANSION }}-network
     ports:
       - 8085:8085
     environment:
@@ -121,6 +135,10 @@ services:
       - {{ CMANGOS_DOCKER_STORAGE_HONOR_PATH }}:/opt/mangos/storage/honor,z
       - {{ CMANGOS_CONFIG_PATH }}/aiplayerbot.{{ CMANGOS_EXPANSION }}.conf:/opt/mangos/etc/aiplayerbot.conf:ro,z
       - {{ CMANGOS_CONFIG_PATH }}/ahbot.conf:/opt/mangos/etc/ahbot.conf:ro,z
+
+networks:
+  cmangos-{{ CMANGOS_EXPANSION }}-network:
+  cmangos-{{ CMANGOS_EXPANSION }}-db-network:
 
 volumes:
   cmangos-{{ CMANGOS_EXPANSION }}-database:
