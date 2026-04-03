@@ -1,13 +1,4 @@
 ---
-- name: Create CMaNGOS Docker dir
-  file:
-    path: '{{ CMANGOS_DOCKER_PATH }}'
-    state: directory
-    owner: '{{ CMANGOS_HOST_UID }}'
-    group: '{{ CMANGOS_HOST_GID }}'
-    mode: '0755'
-  become: true
-
 - name: Create CMaNGOS subdirs
   file:
     path: '{{ cmangos_dir }}'

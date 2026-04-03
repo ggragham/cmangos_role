@@ -20,3 +20,12 @@
         install_weak_deps: false
       when: ansible_os_family == 'RedHat'
       become: true
+
+- name: Create CMaNGOS Docker dir
+  file:
+    path: '{{ CMANGOS_DOCKER_PATH }}'
+    state: directory
+    owner: '{{ CMANGOS_HOST_UID }}'
+    group: '{{ CMANGOS_HOST_GID }}'
+    mode: '0755'
+  become: true
