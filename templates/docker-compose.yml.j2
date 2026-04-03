@@ -55,8 +55,9 @@ services:
       - DB01_PASS=${MARIADB_ROOT_PASSWORD}
 
 {% if CMANGOS_INSTALL_PHPMYADMIN | default(false) | bool %}
-  phpmyadmin:
+  {{ CMANGOS_PHPMYADMIN_SERVICE_NAME }}:
     image: phpmyadmin
+    container_name: {{ CMANGOS_PHPMYADMIN_SERVICE_NAME }}-container
     depends_on:
       - {{ CMANGOS_DB_SERVICE_NAME }}
     restart: unless-stopped

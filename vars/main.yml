@@ -11,6 +11,7 @@ CMANGOS_SERVICE_NAME: cmangos-{{ CMANGOS_EXPANSION }}  # CMaNGOS service name.
 CMANGOS_DB_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-db'  # CMaNGOS DB service name.
 CMANGOS_REALMD_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-realmd'  # CMaNGOS realmd service name.
 CMANGOS_MANGOSD_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-mangosd'  # CMaNGOS mangosd service name.
+CMANGOS_PHPMYADMIN_SERVICE_NAME: phpmyadmin  # phpMyAdmin service name.
 
 # Command to execute MariaDB with user credentials and settings.
 CMANGOS_MARIADB_EXEC_CMD: >-
