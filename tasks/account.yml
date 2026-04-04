@@ -1,4 +1,20 @@
 ---
+- name: Check that DB service is running
+  block:
+    - name: Check that DB service is running in docker compose
+      community.docker.docker_host_info:
+        containers: true
+        containers_filters:
+          label:
+            - com.docker.compose.service={{ CMANGOS_DB_SERVICE_NAME }}
+      register: cmangos_db_service_info
+      changed_when: false
+
+    - name: Abort when DB service is not running
+      fail:
+        msg: Database service is not running.
+      when: (cmangos_db_service_info.containers | default([]) | length) == 0
+
 - name: Get data
   block:
     - name: Get account name
