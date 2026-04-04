@@ -21,6 +21,20 @@
       when: ansible_os_family == 'RedHat'
       become: true
 
+- name: Install passlib
+  block:
+    - name: Install Rsync to RHEL-based system
+      dnf:
+        name: python3-passlib
+        state: present
+        update_cache: true
+        install_weak_deps: false
+      when: ansible_os_family == 'RedHat'
+      become: true
+  when:
+    - CMANGOS_INSTALL_PHPMYADMIN
+    - CMANGOS_INSTALL_NGINX
+
 - name: Create CMaNGOS Docker dir
   file:
     path: '{{ CMANGOS_DOCKER_PATH }}'

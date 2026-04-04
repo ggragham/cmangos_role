@@ -26,6 +26,8 @@ CMANGOS_INSTALL_PHPMYADMIN: false  # Enable phpMyAdmin for database administrati
 CMANGOS_INSTALL_NGINX: true  # Enable Nginx reverse proxy service.
 CMANGOS_NGINX_DOCKER_TAG: latest  # Nginx container image tag.
 CMANGOS_NGINX_USE_SSL: false  # Enable SSL/TLS for Nginx.
+CMANGOS_NGINX_PHPMYADMIN_BASIC_AUTH_USER: admin  # Username for Nginx Basic Auth protecting phpMyAdmin.
+CMANGOS_NGINX_PHPMYADMIN_BASIC_AUTH_PASSWORD: change_me  # Password for Nginx Basic Auth protecting phpMyAdmin; recommended to change.
 CMANGOS_NGINX_SSL_CERT_PATH: ./cert/default.crt  # SSL certificate path.
 CMANGOS_NGINX_SSL_KEY_PATH: ./cert/default.key  # SSL private key path.
 CMANGOS_NGINX_SSL_DH_PATH: ./cert/dhparam.pem  # Diffie-Hellman parameters file path.

@@ -167,6 +167,7 @@ services:
     volumes:
       - {{ CMANGOS_NGINX_LOGS_PATH }}:/var/log/nginx:z
       - {{ CMANGOS_CONFIG_PATH }}/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+      - {{ CMANGOS_CONFIG_PATH }}/phpmyadmin.htpasswd:/etc/nginx/phpmyadmin.htpasswd:ro,Z
       - {{ CMANGOS_NGINX_SSL_PATH }}/default.crt:/etc/nginx/default.crt:ro,Z
       - {{ CMANGOS_NGINX_SSL_PATH }}/default.key:/etc/nginx/default.key:ro,Z
       - {{ CMANGOS_NGINX_SSL_PATH }}/dhparam.pem:/etc/nginx/dhparam.pem:ro,Z

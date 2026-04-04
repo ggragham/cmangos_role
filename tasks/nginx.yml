@@ -36,3 +36,14 @@
     - {path: '{{ CMANGOS_NGINX_SSL_KEY_PATH }}', filename: default.key}
     - {path: '{{ CMANGOS_NGIXN_SSL_DH_PATH }}', filename: dhparam.pem}
   when: CMANGOS_NGINX_USE_SSL | default(false) | bool
+
+- name: Set password to phpMyAdmin
+  htpasswd:
+    path: '{{ CMANGOS_CONFIG_PATH }}/phpmyadmin.htpasswd'
+    name: '{{ CMANGOS_NGINX_PHPMYADMIN_BASIC_AUTH_USER }}'
+    password: '{{ CMANGOS_NGINX_PHPMYADMIN_BASIC_AUTH_PASSWORD }}'
+    hash_scheme: sha512_crypt
+    owner: '{{ CMANGOS_HOST_UID }}'
+    mode: '0600'
+    create: true
+  no_log: true
