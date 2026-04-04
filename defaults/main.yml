@@ -37,5 +37,5 @@ CMANGOS_MANGOSD_REALM_ZONE: 1  # Realm region/zone ID; see mangosd.conf for vali
 CMANGOS_MANGOSD_MOTD: Welcome to the Continued Massive Network Game Object Server.  # Message of the day.
 
 ## Rates
-CMANGOS_MANGOSD_XP_RATE: 1.2  # Experience rate multiplier.
-CMANGOS_MANGOSD_MONEY_RATE: 1.2  # Money drop rate multiplier.
+CMANGOS_MANGOSD_XP_RATE: 1  # Experience rate multiplier. Examples: 1 = normal, 2 = double rate, 0.5 = half rate.
+CMANGOS_MANGOSD_MONEY_RATE: 1  # Money drop rate multiplier. Examples: 1 = normal, 2 = double rate, 0.5 = half rate.
