@@ -15,3 +15,7 @@
       include_tasks: db.yml
 
   when: action is not defined
+
+- name: Create realm account
+  include_tasks: account.yml
+  when: action | default('') == 'create_account'

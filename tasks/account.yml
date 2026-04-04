@@ -1,0 +1,262 @@
+---
+- name: Get data
+  block:
+    - name: Get account name
+      pause:
+        prompt: Enter account name
+      when: (account_name | default('') | string) == ''
+      register: account_name_prompt
+
+    - name: Get account password
+      pause:
+        prompt: Enter account password
+        echo: false
+      when: (account_password | default('') | string) == ''
+      register: account_password_prompt
+
+    - name: Get GM Level
+      pause:
+        prompt: Enter desired GM Level (0 - player, 1 - moderator, 2 - GameMaster, 3 - Administrator)
+      when: (account_gm_level | default('') | string) == ''
+      register: account_gm_level_prompt
+
+- name: Create or update CMaNGOS account
+  block:
+    - name: Prepare effective account values
+      set_fact:
+        cmangos_account_name_value: >-
+          {{
+            (
+              (account_name_prompt | default({})).user_input
+              if ((account_name | default('') | string) == '')
+              else account_name
+            ) | string | trim
+          }}
+        cmangos_account_password_value: >-
+          {{
+            (
+              (account_password_prompt | default({})).user_input
+              if ((account_password | default('') | string) == '')
+              else account_password
+            ) | string
+          }}
+        cmangos_account_gm_level_value: >-
+          {{
+            (
+              (account_gm_level_prompt | default({})).user_input
+              if ((account_gm_level | default('') | string) == '')
+              else account_gm_level
+            ) | int
+          }}
+        cmangos_account_expansion_id: >-
+          {{
+            {
+              'classic': 0,
+              'tbc': 1,
+              'wotlk': 2
+            }[CMANGOS_EXPANSION | lower]
+          }}
+      no_log: true
+
+    - name: Validate account params
+      assert:
+        that:
+          - (cmangos_account_name_value | length) > 0
+          - (cmangos_account_password_value | length) > 0
+          - (cmangos_account_gm_level_value | int) >= 0
+          - (cmangos_account_gm_level_value | int) <= 3
+          - (CMANGOS_EXPANSION | lower) in ['classic', 'tbc', 'wotlk']
+        fail_msg: >-
+          Invalid account params:
+          account_name/account_password must be non-empty,
+          account_gm_level must be 0..3,
+          CMANGOS_EXPANSION must be classic|tbc|wotlk.
+      no_log: true
+
+    - name: Prepare account SQL values
+      set_fact:
+        cmangos_account_name_sql: "{{ cmangos_account_name_value | upper | replace(\"'\", \"''\") }}"
+      no_log: true
+
+    - name: Read current account row
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT CONCAT_WS(
+            '\t',
+            COALESCE(id, ''),
+            COALESCE(username, ''),
+            COALESCE(s, ''),
+            COALESCE(v, ''),
+            COALESCE(gmlevel, ''),
+            COALESCE(expansion, '')
+          )
+          FROM account
+          WHERE UPPER(username) = UPPER('{{ cmangos_account_name_sql }}')
+          LIMIT 1;
+      register: cmangos_account_row
+      changed_when: false
+      no_log: true
+
+    - name: Parse current account state
+      set_fact:
+        cmangos_account_exists: '{{ (cmangos_account_row.stdout | trim | length) > 0 }}'
+        cmangos_account_parts: "{{ (cmangos_account_row.stdout | trim).split('\t') + ['', '', '', '', '', ''] }}"
+      no_log: true
+
+    - name: Calculate SRP6 values
+      shell: |
+        python3 - <<'PY'
+        import json
+        import hashlib
+        import secrets
+
+        username = {{ cmangos_account_name_sql | to_json }}
+        password = {{ cmangos_account_password_value | to_json }}
+        current_s = {{ (cmangos_account_parts[2] if (cmangos_account_exists | bool) else '') | to_json }}
+
+        N = int('894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7', 16)
+        g = 7
+
+        def calc_verifier(user, pwd, salt_bytes):
+            h1 = hashlib.sha1(f"{user.upper()}:{pwd.upper()}".encode("utf-8")).digest()
+            h2 = hashlib.sha1(salt_bytes[::-1] + h1).digest()
+            x = int.from_bytes(h2, "little")
+            v = pow(g, x, N)
+            verifier_le = v.to_bytes(32, "little", signed=False)
+            verifier_hex = verifier_le[::-1].hex().upper()
+            salt_hex = salt_bytes.hex().upper()
+            return salt_hex, verifier_hex
+
+        if current_s:
+            current_salt = bytes.fromhex(current_s)
+            _, current_v_expected = calc_verifier(username, password, current_salt)
+        else:
+            current_v_expected = ""
+
+        new_salt = secrets.token_bytes(32)
+        new_s_hex, new_v_hex = calc_verifier(username, password, new_salt)
+
+        print(json.dumps({
+            "current_v_expected": current_v_expected,
+            "new_s": new_s_hex,
+            "new_v": new_v_hex
+        }))
+        PY
+      args:
+        executable: /bin/bash
+      register: cmangos_srp_values_raw
+      changed_when: false
+      no_log: true
+
+    - name: Parse SRP6 values
+      set_fact:
+        cmangos_srp_values: '{{ cmangos_srp_values_raw.stdout | from_json }}'
+      no_log: true
+
+    - name: Create account when absent
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          INSERT INTO account
+            (username, s, v, gmlevel, expansion, joindate)
+          VALUES
+            (
+              '{{ cmangos_account_name_sql }}',
+              '{{ cmangos_srp_values.new_s }}',
+              '{{ cmangos_srp_values.new_v }}',
+              {{ cmangos_account_gm_level_value }},
+              {{ cmangos_account_expansion_id | int }},
+              NOW()
+            );
+      when: not (cmangos_account_exists | bool)
+      no_log: true
+
+    - name: Update password when verifier differs
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          UPDATE account
+          SET
+            s = '{{ cmangos_srp_values.new_s }}',
+            v = '{{ cmangos_srp_values.new_v }}'
+          WHERE id = {{ cmangos_account_parts[0] | int }};
+          SELECT ROW_COUNT();
+      register: cmangos_account_password_update_result
+      changed_when: >-
+        {{
+          (cmangos_account_password_update_result.stdout_lines | last | trim | int) > 0
+        }}
+      when:
+        - cmangos_account_exists | bool
+        - (cmangos_account_parts[3] | upper) != (cmangos_srp_values.current_v_expected | upper)
+      no_log: true
+
+    - name: Update gmlevel or expansion when they differ
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          UPDATE account
+          SET
+            gmlevel = {{ cmangos_account_gm_level_value }},
+            expansion = {{ cmangos_account_expansion_id | int }}
+          WHERE id = {{ cmangos_account_parts[0] | int }};
+          SELECT ROW_COUNT();
+      register: cmangos_account_flags_update_result
+      changed_when: >-
+        {{
+          (cmangos_account_flags_update_result.stdout_lines | last | trim | int) > 0
+        }}
+      when:
+        - cmangos_account_exists | bool
+        - (cmangos_account_parts[4] | int) != (cmangos_account_gm_level_value | int) or (cmangos_account_parts[5] | int) != (cmangos_account_expansion_id | int)
+
+    - name: Read resulting account row
+      community.docker.docker_compose_v2_exec:
+        project_src: '{{ CMANGOS_DOCKER_PATH }}'
+        service: '{{ CMANGOS_DB_SERVICE_NAME }}'
+        tty: false
+        argv:
+          - /bin/sh
+          - -lc
+          - '{{ CMANGOS_MARIADB_EXEC_CMD }}'
+        stdin: |
+          USE {{ CMANGOS_EXPANSION }}realmd;
+          SELECT CONCAT_WS(' | ', id, username, gmlevel, expansion, LENGTH(s), LENGTH(v))
+          FROM account
+          WHERE UPPER(username) = UPPER('{{ cmangos_account_name_sql }}')
+          LIMIT 1;
+      register: cmangos_account_after
+      changed_when: false
+
+    - name: Show resulting account row
+      debug:
+        var: cmangos_account_after.stdout_lines
