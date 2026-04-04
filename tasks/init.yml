@@ -21,6 +21,14 @@
       when: ansible_os_family == 'RedHat'
       become: true
 
+    - name: Install Rsync to Debian-based system
+      apt:
+        name: rsync
+        state: latest
+        update_cache: true
+      when: ansible_os_family == "Debian"
+      become: true
+
 - name: Install passlib
   block:
     - name: Install Rsync to RHEL-based system
@@ -31,6 +39,15 @@
         install_weak_deps: false
       when: ansible_os_family == 'RedHat'
       become: true
+
+    - name: Install passlib to Debian-based system
+      apt:
+        name: python3-passlib
+        state: latest
+        update_cache: true
+      when: ansible_os_family == "Debian"
+      become: true
+
   when:
     - CMANGOS_INSTALL_PHPMYADMIN
     - CMANGOS_INSTALL_NGINX
