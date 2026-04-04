@@ -4,12 +4,12 @@ CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP 
 CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
 CMANGOS_ASSETS_SRC: ./client-data  # Path to extracted WoW client-data, or keep ./client-data next to the playbook.
 
+CMANGOS_HOST_UID: 1000  # UID of the primary user on the host; usually 1000.
+CMANGOS_HOST_GID: 1000  # GID of the primary user on the host; usually 1000.
+
 CMANGOS_DB_USERNAME: mangos_username  # Database application username.
 CMANGOS_DB_PASSWORD: mangos_password  # Database application password; recommended to change.
 CMANGOS_DB_ROOT_PASSWORD: mangos_root_password  # Database root password; recommended to change.
-
-CMANGOS_HOST_UID: 1000  # UID of the primary user on the host; usually 1000.
-CMANGOS_HOST_GID: 1000  # GID of the primary user on the host; usually 1000.
 
 # Bot settings
 CMANGOS_ENABLE_BOTS: true  # Enable "AI" player bots.
@@ -17,9 +17,12 @@ CMANGOS_AIPLAYERBOT_MIN_RANDOM_BOTS: 900  # Minimum random bot count.
 CMANGOS_AIPLAYERBOT_MAX_RANDOM_BOTS: 1000  # Maximum random bot count.
 
 # Advanced settings
+
+## Container features
 CMANGOS_DOCKER_TAG: 2025.05.11  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
 CMANGOS_INSTALL_PHPMYADMIN: false  # Enable phpMyAdmin for database administration; exposed on port 8080 when enabled.
 
+## Nginx settings
 CMANGOS_INSTALL_NGINX: true  # Enable Nginx reverse proxy service.
 CMANGOS_NGINX_DOCKER_TAG: latest  # Nginx container image tag.
 CMANGOS_NGINX_USE_SSL: false  # Enable SSL/TLS for Nginx.
@@ -27,10 +30,12 @@ CMANGOS_NGINX_SSL_CERT_PATH: ./cert/default.crt  # SSL certificate path.
 CMANGOS_NGINX_SSL_KEY_PATH: ./cert/default.key  # SSL private key path.
 CMANGOS_NGINX_SSL_DH_PATH: ./cert/dhparam.pem  # Diffie-Hellman parameters file path.
 
+## Realm settings
 CMANGOS_MANGOSD_SERVER_NAME: CMaNGOS  # Realm name shown in the client.
 CMANGOS_MANGOSD_GAME_TYPE: 1  # Realm game type; see mangosd.conf for valid values.
 CMANGOS_MANGOSD_REALM_ZONE: 1  # Realm region/zone ID; see mangosd.conf for valid values.
 CMANGOS_MANGOSD_MOTD: Welcome to the Continued Massive Network Game Object Server.  # Message of the day.
 
+## Rates
 CMANGOS_MANGOSD_XP_RATE: 1.2  # Experience rate multiplier.
 CMANGOS_MANGOSD_MONEY_RATE: 1.2  # Money drop rate multiplier.
