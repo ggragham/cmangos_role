@@ -1837,15 +1837,15 @@ Network.KickOnBadPacket = 0
 ###################################################################################################################
 
 Console.Enable = 1
-Ra.Enable = 0
-Ra.IP = 0.0.0.0
+Ra.Enable = 1
+Ra.IP = 127.0.0.1
 Ra.Port = 3443
 Ra.MinLevel = 3
 Ra.Secure = 1
 Ra.Restricted = 1
 
 SOAP.Enabled = 0
-SOAP.IP = database
+SOAP.IP = {{ CMANGOS_DB_SERVICE_NAME }}
 SOAP.Port = 7878
 
 ###################################################################################################################
@@ -1906,7 +1906,7 @@ CharDelete.KeepDays = 30
 ###################################################################################################################
 
 Metric.Enable = 0
-Metric.Address = "database"
+Metric.Address = "{{ CMANGOS_DB_SERVICE_NAME }}"
 Metric.Port = 8086
 Metric.Database = "perfd"
 Metric.Username = ""

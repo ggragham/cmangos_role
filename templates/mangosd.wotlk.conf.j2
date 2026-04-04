@@ -1945,7 +1945,7 @@ Ra.Secure = 1
 Ra.Restricted = 1
 
 SOAP.Enabled = 0
-SOAP.IP = database
+SOAP.IP = {{ CMANGOS_DB_SERVICE_NAME }}
 SOAP.Port = 7878
 
 ###################################################################################################################
@@ -2006,7 +2006,7 @@ CharDelete.KeepDays = 30
 ###################################################################################################################
 
 Metric.Enable = 0
-Metric.Address = "database"
+Metric.Address = "{{ CMANGOS_DB_SERVICE_NAME }}"
 Metric.Port = 8086
 Metric.Database = "perfd"
 Metric.Username = ""
