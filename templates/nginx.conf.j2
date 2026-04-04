@@ -1,0 +1,169 @@
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /tmp/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+stream {
+    server {
+        listen 3724;
+        proxy_pass {{ CMANGOS_REALMD_SERVICE_NAME }}:3724;
+    }
+
+    server {
+        listen 8085;
+        proxy_pass {{ CMANGOS_MANGOSD_SERVICE_NAME }}:8085;
+    }
+}
+
+http {
+    proxy_temp_path /tmp/proxy_temp;
+    client_body_temp_path /tmp/client_temp;
+    fastcgi_temp_path /tmp/fastcgi_temp;
+    uwsgi_temp_path /tmp/uwsgi_temp;
+    scgi_temp_path /tmp/scgi_temp;
+
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log main;
+
+    sendfile on;
+    keepalive_timeout 65;
+
+    resolver 127.0.0.11 valid=10s;
+    server_tokens off;
+
+    {% set domain_is_ip = (CMANGOS_DOMAIN | regex_search('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')) %}
+    {% set backend = 'http://' ~ CMANGOS_PHPMYADMIN_SERVICE_NAME %}
+    {% set server_name = CMANGOS_DOMAIN if domain_is_ip else 'db.' ~ CMANGOS_DOMAIN %}
+
+    server {
+        listen 80;
+        server_name {{ server_name }};
+
+        autoindex off;
+        server_tokens off;
+
+    {% if CMANGOS_NGINX_USE_SSL | bool %}
+        return 301 https://$host$request_uri;
+    {% else %}
+
+        {% if domain_is_ip %}
+        location = /db {
+            return 301 /db/;
+        }
+
+        location /db/ {
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host              $http_host;
+            proxy_set_header X-NginX-Proxy     true;
+            proxy_set_header Connection        "";
+            proxy_pass_header X-Transmission-Session-Id;
+            add_header        Front-End-Https  on;
+
+            proxy_pass {{ backend }}/;
+        }
+
+        location / {
+            return 404;
+        }
+        {% else %}
+        location / {
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host              $http_host;
+            proxy_set_header X-NginX-Proxy     true;
+            proxy_set_header Connection        "";
+            proxy_pass_header X-Transmission-Session-Id;
+            add_header        Front-End-Https  on;
+
+            proxy_pass {{ backend }};
+        }
+        {% endif %}
+
+    {% endif %}
+
+        access_log /var/log/nginx/cmangos-{{ CMANGOS_EXPANSION }}-access.log;
+        error_log  /var/log/nginx/cmangos-{{ CMANGOS_EXPANSION }}-error.log;
+    }
+
+    {% if CMANGOS_NGINX_USE_SSL | bool %}
+    server {
+        listen 443 ssl;
+        server_name {{ server_name }};
+        root /var/www/html;
+
+        autoindex off;
+        server_tokens off;
+
+        {% if domain_is_ip %}
+        location = /db {
+            return 301 /db/;
+        }
+
+        location /db/ {
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host              $http_host;
+            proxy_set_header X-NginX-Proxy     true;
+            proxy_set_header Connection        "";
+            proxy_pass_header X-Transmission-Session-Id;
+            add_header        Front-End-Https  on;
+
+            proxy_pass {{ backend }}/;
+        }
+
+        location / {
+            return 404;
+        }
+        {% else %}
+        location / {
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host              $http_host;
+            proxy_set_header X-NginX-Proxy     true;
+            proxy_set_header Connection        "";
+            proxy_pass_header X-Transmission-Session-Id;
+            add_header        Front-End-Https  on;
+
+            proxy_pass {{ backend }};
+        }
+        {% endif %}
+
+        ssl_certificate     /etc/nginx/default.crt;
+        ssl_certificate_key /etc/nginx/default.key;
+        ssl_dhparam         /etc/nginx/dhparam.pem;
+
+        ssl_protocols TLSv1.3;
+        ssl_prefer_server_ciphers on;
+        ssl_ciphers EECDH+AESGCM:EDH+AESGCM;
+        ssl_ecdh_curve secp384r1;
+        ssl_session_timeout 10m;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_tickets off;
+        ssl_stapling off;
+        ssl_stapling_verify on;
+
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+
+        access_log /var/log/nginx/cmangos-{{ CMANGOS_EXPANSION }}-access.log;
+        error_log  /var/log/nginx/cmangos-{{ CMANGOS_EXPANSION }}-error.log;
+    }
+    {% endif %}
+}

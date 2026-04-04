@@ -5,5 +5,9 @@
 - name: Deploy CMaNGOS
   include_tasks: deploy.yml
 
+- name: Deploy Nginx
+  include_tasks: nginx.yml
+  when: CMANGOS_INSTALL_NGINX | default(false) | bool
+
 - name: Configure DB
   include_tasks: db.yml

@@ -1,0 +1,38 @@
+---
+- name: Create Nginx logs dirs
+  file:
+    path: '{{ CMANGOS_NGINX_LOGS_PATH }}'
+    state: directory
+    owner: '{{ CMANGOS_HOST_UID }}'
+    group: '{{ CMANGOS_HOST_GID }}'
+    mode: '0755'
+
+- name: Create Nginx SSL dirs
+  file:
+    path: '{{ CMANGOS_NGINX_SSL_PATH }}'
+    state: directory
+    owner: '{{ CMANGOS_HOST_UID }}'
+    group: '{{ CMANGOS_HOST_GID }}'
+    mode: '0700'
+
+- name: Apply nginx config
+  template:
+    src: nginx.conf.j2
+    dest: '{{ CMANGOS_CONFIG_PATH }}/nginx.conf'
+    owner: '{{ CMANGOS_HOST_UID }}'
+    group: '{{ CMANGOS_HOST_GID }}'
+    mode: '0640'
+
+- name: Apply SSL files
+  copy:
+    src: '{{ nginx_ssl.path }}/{{ nginx_ssl.filename }}.j2'
+    dest: /etc/nginx/{{ nginx_ssl.filename }}
+    owner: '{{ CMANGOS_HOST_UID }}'
+    mode: '0400'
+  loop_control:
+    loop_var: nginx_ssl
+  loop:
+    - {path: '{{ CMANGOS_NGINX_SSL_CERT_PATH }}', filename: default.crt}
+    - {path: '{{ CMANGOS_NGINX_SSL_KEY_PATH }}', filename: default.key}
+    - {path: '{{ CMANGOS_NGIXN_SSL_DH_PATH }}', filename: dhparam.pem}
+  when: CMANGOS_NGINX_USE_SSL | default(false) | bool

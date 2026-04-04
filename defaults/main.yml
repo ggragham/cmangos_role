@@ -20,6 +20,13 @@ CMANGOS_AIPLAYERBOT_MAX_RANDOM_BOTS: 1000  # Maximum random bot count.
 CMANGOS_DOCKER_TAG: 2025.05.11  # Container image version tag from ThoriumLXC images (docker.io/thoriumlxc/).
 CMANGOS_INSTALL_PHPMYADMIN: false  # Enable phpMyAdmin for database administration; exposed on port 8080 when enabled.
 
+CMANGOS_INSTALL_NGINX: true  # Enable Nginx reverse proxy service.
+CMANGOS_NGINX_DOCKER_TAG: latest  # Nginx container image tag.
+CMANGOS_NGINX_USE_SSL: false  # Enable SSL/TLS for Nginx.
+CMANGOS_NGINX_SSL_CERT_PATH: ./cert/default.crt  # SSL certificate path.
+CMANGOS_NGINX_SSL_KEY_PATH: ./cert/default.key  # SSL private key path.
+CMANGOS_NGINX_SSL_DH_PATH: ./cert/dhparam.pem  # Diffie-Hellman parameters file path.
+
 CMANGOS_MANGOSD_SERVER_NAME: CMaNGOS  # Realm name shown in the client.
 CMANGOS_MANGOSD_GAME_TYPE: 1  # Realm game type; see mangosd.conf for valid values.
 CMANGOS_MANGOSD_REALM_ZONE: 1  # Realm region/zone ID; see mangosd.conf for valid values.

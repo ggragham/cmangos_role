@@ -63,8 +63,13 @@ services:
     restart: unless-stopped
     networks:
       - cmangos-{{ CMANGOS_EXPANSION }}-db-network
+{% if CMANGOS_INSTALL_NGINX | default(false) | bool %}
+      - cmangos-{{ CMANGOS_EXPANSION }}-nginx-network
+{% endif %}
+{% if not CMANGOS_INSTALL_NGINX | default(false) | bool %}
     ports:
-      - 8080:80
+      - 8080:80/tcp
+{% endif %}
     environment:
       - PMA_HOST={{ CMANGOS_DB_SERVICE_NAME }}
       - PMA_PORT=3306
@@ -94,8 +99,13 @@ services:
     networks:
       - cmangos-{{ CMANGOS_EXPANSION }}-db-network
       - cmangos-{{ CMANGOS_EXPANSION }}-network
+{% if CMANGOS_INSTALL_NGINX | default(false) | bool %}
+      - cmangos-{{ CMANGOS_EXPANSION }}-nginx-network
+{% endif %}
+{% if not CMANGOS_INSTALL_NGINX | default(false) | bool %}
     ports:
-      - 3724:3724
+      - 3724:3724/tcp
+{% endif %}
     volumes:
       - {{ CMANGOS_CONFIG_PATH }}/realmd.conf:/opt/mangos/etc/realmd.conf:ro,z
       - {{ CMANGOS_REALMD_LOGS_PATH }}:/opt/mangos/storage/logs:Z
@@ -125,8 +135,13 @@ services:
     networks:
       - cmangos-{{ CMANGOS_EXPANSION }}-db-network
       - cmangos-{{ CMANGOS_EXPANSION }}-network
+{% if CMANGOS_INSTALL_NGINX | default(false) | bool %}
+      - cmangos-{{ CMANGOS_EXPANSION }}-nginx-network
+{% endif %}
+{% if not CMANGOS_INSTALL_NGINX | default(false) | bool %}
     ports:
-      - 8085:8085
+      - 8085:8085/tcp
+{% endif %}
     environment:
       - TZ=Etc/UTC
     volumes:
@@ -137,10 +152,37 @@ services:
       - {{ CMANGOS_CONFIG_PATH }}/aiplayerbot.{{ CMANGOS_EXPANSION }}.conf:/opt/mangos/etc/aiplayerbot.conf:ro,z
       - {{ CMANGOS_CONFIG_PATH }}/ahbot.conf:/opt/mangos/etc/ahbot.conf:ro,z
 
+  # ================================================
+
+{% if CMANGOS_INSTALL_NGINX | default(false) | bool %}
+  {{ CMANGOS_NGINX_SERVICE_NAME }}:
+    image: nginxinc/nginx-unprivileged:{{ CMANGOS_NGINX_DOCKER_TAG }}
+    container_name: {{ CMANGOS_NGINX_SERVICE_NAME }}-container
+    depends_on:
+      - {{ CMANGOS_PHPMYADMIN_SERVICE_NAME }}
+      - {{ CMANGOS_REALMD_SERVICE_NAME }}
+      - {{ CMANGOS_MANGOSD_SERVICE_NAME }}
+    restart: always
+    user: {{ CMANGOS_HOST_UID }}:101
+    volumes:
+      - {{ CMANGOS_NGINX_LOGS_PATH }}:/var/log/nginx:z
+      - {{ CMANGOS_CONFIG_PATH }}/nginx.conf:/etc/nginx/nginx.conf:ro,Z
+      - {{ CMANGOS_NGINX_SSL_PATH }}/default.crt:/etc/nginx/default.crt:ro,Z
+      - {{ CMANGOS_NGINX_SSL_PATH }}/default.key:/etc/nginx/default.key:ro,Z
+      - {{ CMANGOS_NGINX_SSL_PATH }}/dhparam.pem:/etc/nginx/dhparam.pem:ro,Z
+    networks:
+      - cmangos-{{ CMANGOS_EXPANSION }}-nginx-network
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+      - 3724:3724/tcp
+      - 8085:8085/tcp
+{% endif %}
+
 networks:
   cmangos-{{ CMANGOS_EXPANSION }}-network:
   cmangos-{{ CMANGOS_EXPANSION }}-db-network:
+  cmangos-{{ CMANGOS_EXPANSION }}-nginx-network:
 
 volumes:
   cmangos-{{ CMANGOS_EXPANSION }}-database:
-
