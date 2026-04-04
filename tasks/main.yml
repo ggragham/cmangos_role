@@ -1,13 +1,17 @@
 ---
-- name: Init tasks
-  include_tasks: init.yml
+- name: Install and configure CMaNGOS
+  block:
+    - name: Init tasks
+      include_tasks: init.yml
 
-- name: Deploy CMaNGOS
-  include_tasks: deploy.yml
+    - name: Deploy CMaNGOS
+      include_tasks: deploy.yml
 
-- name: Deploy Nginx
-  include_tasks: nginx.yml
-  when: CMANGOS_INSTALL_NGINX | default(false) | bool
+    - name: Deploy Nginx
+      include_tasks: nginx.yml
+      when: CMANGOS_INSTALL_NGINX | default(false) | bool
 
-- name: Configure DB
-  include_tasks: db.yml
+    - name: Configure DB
+      include_tasks: db.yml
+
+  when: action is not defined
