@@ -16,6 +16,14 @@ CMANGOS_MANGOSD_SERVICE_NAME: '{{ CMANGOS_SERVICE_NAME }}-mangosd'  # CMaNGOS ma
 CMANGOS_PHPMYADMIN_SERVICE_NAME: phpmyadmin  # phpMyAdmin service name.
 CMANGOS_NGINX_SERVICE_NAME: nginx  # Nginx service name.
 
+# CMaNGOS realm domain.
+CMANGOS_REALM_DOMAIN: >-
+  {{
+    CMANGOS_DOMAIN
+    if CMANGOS_DOMAIN is match('^((25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])$')
+    else 'realm.' ~ CMANGOS_DOMAIN
+  }}
+
 # Command to execute MariaDB with user credentials and settings.
 CMANGOS_MARIADB_EXEC_CMD: >-
   exec mariadb

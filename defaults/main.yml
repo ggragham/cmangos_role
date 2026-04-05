@@ -1,6 +1,6 @@
 ---
 # Core settings
-CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP address.
+CMANGOS_DOMAIN: 127.0.0.1  # Client connection base address: IP -> realm=<IP>, phpMyAdmin=<IP>/db; FQDN -> realm=realm.<FQDN>, phpMyAdmin=db.<FQDN>.
 CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
 CMANGOS_ASSETS_SRC: ./client-data  # Path to extracted WoW client-data, or keep ./client-data next to the playbook.
 

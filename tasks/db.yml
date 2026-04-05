@@ -82,7 +82,7 @@
             (
               1,
               '{{ CMANGOS_MANGOSD_SERVER_NAME | replace("'", "''") }}',
-              '{{ CMANGOS_DOMAIN | replace("'", "''") }}',
+              '{{ CMANGOS_REALM_DOMAIN | replace("'", "''") }}',
               8085
             );
       when: not (realmlist_row1_exists | bool)
@@ -101,11 +101,11 @@
           UPDATE realmlist
           SET
             name = '{{ CMANGOS_MANGOSD_SERVER_NAME | replace("'", "''") }}',
-            address = '{{ CMANGOS_DOMAIN | replace("'", "''") }}'
+            address = '{{ CMANGOS_REALM_DOMAIN | replace("'", "''") }}'
           WHERE id = 1;
       when:
         - realmlist_row1_exists | bool
-        - realmlist_row1_parts[0] != (CMANGOS_MANGOSD_SERVER_NAME | string) or realmlist_row1_parts[1] != (CMANGOS_DOMAIN | string)
+        - realmlist_row1_parts[0] != (CMANGOS_MANGOSD_SERVER_NAME | string) or realmlist_row1_parts[1] != (CMANGOS_REALM_DOMAIN | string)
 
     - name: Read resulting realmlist row
       community.docker.docker_compose_v2_exec:
