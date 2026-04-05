@@ -47,7 +47,7 @@ Role Variables
 
 ```yml
 # Core settings
-CMANGOS_DOMAIN: 127.0.0.1  # Realm address for clients; can be an FQDN or an IP address.
+CMANGOS_DOMAIN: 127.0.0.1  # Client connection base address: IP -> realm=<IP>, phpMyAdmin=<IP>/db; FQDN -> realm=realm.<FQDN>, phpMyAdmin=db.<FQDN>.
 CMANGOS_EXPANSION: tbc  # Game expansion: classic, tbc, or wotlk.
 CMANGOS_ASSETS_SRC: ./client-data  # Path to extracted WoW client-data, or keep ./client-data next to the playbook.
 
@@ -130,6 +130,23 @@ Run deployment:
 ```bash
 ansible-playbook -i <inventory> playbook.yml
 ```
+
+After deployment, client-facing addresses are derived from `CMANGOS_DOMAIN` as follows:
+
+- If set to an IP address:
+  - realm address: `<IP>`
+  - phpMyAdmin address: `<IP>/db` if phpMyAdmin is enabled
+
+- If set to an FQDN:
+  - realm address: `realm.<FQDN>`
+  - phpMyAdmin address: `db.<FQDN>` if phpMyAdmin is enabled
+
+Examples:
+
+- `CMANGOS_DOMAIN: 192.0.2.10` -> realm: `192.0.2.10`, phpMyAdmin: `192.0.2.10/db`
+- `CMANGOS_DOMAIN: example.com` -> realm: `realm.example.com`, phpMyAdmin: `db.example.com`
+
+When using an FQDN, enabling Nginx is strongly recommended. Without it, the generated subdomain-based endpoints such as `realm.<FQDN>` and `db.<FQDN>` may not be exposed correctly.
 
 Account Creation
 ----------------
