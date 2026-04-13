@@ -41,3 +41,9 @@ CMANGOS_MANGOSD_MOTD: Welcome to the Continued Massive Network Game Object Serve
 ## Rates
 CMANGOS_MANGOSD_XP_RATE: 1  # Experience rate multiplier. Examples: 1 = normal, 2 = double rate, 0.5 = half rate.
 CMANGOS_MANGOSD_MONEY_RATE: 1  # Money drop rate multiplier. Examples: 1 = normal, 2 = double rate, 0.5 = half rate.
+
+# Expert settings
+CMANGOS_REALMD_CONFIG_TEMPLATE_OVERRIDE: false  # Custom Jinja template path for realmd.conf; uses the built-in template when false.
+CMANGOS_MANGOSD_CONFIG_TEMPLATE_OVERRIDE: false  # Custom Jinja template path for mangosd.<expansion>.conf; uses the built-in template when false.
+CMANGOS_AHBOT_CONFIG_TEMPLATE_OVERRIDE: false  # Custom Jinja template path for ahbot.conf; uses the built-in template when false.
+CMANGOS_AIPLAYERBOT_CONFIG_TEMPLATE_OVERRIDE: false  # Custom Jinja template path for aiplayerbot.<expansion>.conf; uses the built-in template when false.

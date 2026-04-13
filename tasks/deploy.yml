@@ -36,7 +36,16 @@
 
 - name: Apply realmd and mangosd config templates
   template:
-    src: '{{ cmangos_default_config }}.j2'
+    src: >-
+      {{
+        CMANGOS_REALMD_CONFIG_TEMPLATE_OVERRIDE
+        if cmangos_default_config == 'realmd.conf' and CMANGOS_REALMD_CONFIG_TEMPLATE_OVERRIDE
+        else
+        CMANGOS_MANGOSD_CONFIG_TEMPLATE_OVERRIDE
+        if cmangos_default_config == 'mangosd.' ~ CMANGOS_EXPANSION ~ '.conf' and CMANGOS_MANGOSD_CONFIG_TEMPLATE_OVERRIDE
+        else
+        cmangos_default_config ~ '.j2'
+      }}
     dest: '{{ CMANGOS_CONFIG_PATH }}/{{ cmangos_default_config }}'
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
@@ -50,7 +59,16 @@
 
 - name: Apply ahbot and aiplayerbot config templates
   template:
-    src: '{{ cmangos_bots_config }}.j2'
+    src: >-
+      {{
+        CMANGOS_AHBOT_CONFIG_TEMPLATE_OVERRIDE
+        if cmangos_bots_config == 'ahbot.conf' and CMANGOS_AHBOT_CONFIG_TEMPLATE_OVERRIDE
+        else
+        CMANGOS_AIPLAYERBOT_CONFIG_TEMPLATE_OVERRIDE
+        if cmangos_bots_config == 'aiplayerbot.' ~ CMANGOS_EXPANSION ~ '.conf' and CMANGOS_AIPLAYERBOT_CONFIG_TEMPLATE_OVERRIDE
+        else
+        cmangos_bots_config ~ '.j2'
+      }}
     dest: '{{ CMANGOS_CONFIG_PATH }}/{{ cmangos_bots_config }}'
     owner: '{{ CMANGOS_HOST_UID }}'
     group: '{{ CMANGOS_HOST_GID }}'
