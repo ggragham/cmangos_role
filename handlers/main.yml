@@ -1,4 +1,15 @@
 ---
+- name: Reload Systemd
+  systemd:
+    daemon_reload: true
+  become: true
+
+- name: Restart Docker
+  systemd:
+    name: docker.service
+    state: restarted
+  become: true
+
 - name: Restart CMaNGOS
   community.docker.docker_compose_v2:
     project_src: '{{ CMANGOS_DOCKER_PATH }}'

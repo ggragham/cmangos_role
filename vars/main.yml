@@ -1,5 +1,6 @@
 ---
 CMANGOS_DOCKER_PATH: /opt/cmangos_docker  # CMaNGOS installation path.
+CMANGOS_DOCKER_SERVICE_TIMEOUT: 10min  # CMaNGOS Docker service timeout.
 CMANGOS_CONFIG_PATH: '{{ CMANGOS_DOCKER_PATH }}/config'  # CMaNGOS configs path.
 CMANGOS_NGINX_SSL_PATH: '{{ CMANGOS_DOCKER_PATH }}/ssl'  # CMaNGOS Nginx SSL certificates path.
 CMANGOS_ASSETS_PATH: '{{ CMANGOS_DOCKER_PATH }}/assets'  # CMaNGOS assets path.

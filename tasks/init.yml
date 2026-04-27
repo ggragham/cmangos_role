@@ -10,6 +10,29 @@
         msg: Docker is not installed
       when: not docker_installed.stat.exists
 
+- name: Configure docker.service stop timeout
+  block:
+    - name: Create docker.service.d dir
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      become: true
+
+    - name: Set Docker service stop timeout override
+      template:
+        src: docker-service-override.conf.j2
+        dest: /etc/systemd/system/docker.service.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Reload Systemd
+        - Restart Docker
+      become: true
+
 - name: Install rsync
   block:
     - name: Install Rsync to RHEL-based system
